@@ -1,0 +1,92 @@
+
+
+PGraphics refImg;
+float spacing = 20;
+float angle = 0;
+
+void setup() {
+  size(800, 400);
+  ellipseMode(CENTER);
+  refImg = createGraphics(400, 400);
+  makeReference(); // genera la imagen de referencia en refImg
+}
+
+void draw() {
+  background(255);
+
+  // Mostrar referencia a la izquierda
+  image(refImg, 0, 0);
+
+  // Patrón interactivo a la derecha
+  pushMatrix();
+  translate(600, 200);     // centro del área derecha
+  rotate(radians(angle));  // rotación controlada por mouse
+  drawPattern(spacing, 200, true); // animado
+  popMatrix();
+}
+
+void makeReference() {
+  refImg.beginDraw();
+  refImg.background(255); 
+  refImg.stroke(0);
+
+  float step = 20;
+  float size = 200;
+
+  // patrón en blanco y negro 
+  for (float x = -size; x < size; x += step) {
+    for (float y = -size; y < size; y += step) {
+      float d = dist(x, y, 0, 0);
+      float s = map(sin(d / 20.0), -1, 1, 5, step); // sin frameCount → fijo
+      refImg.fill(0);
+      refImg.ellipse(x + 200, y + 200, s, s);
+    }
+  }
+
+  refImg.endDraw();
+}
+
+// -----------------------------------------------------------------
+// FUNCIONES PROPIAS
+// -----------------------------------------------------------------
+
+// función que DIBUJA (no retorna)
+void drawPattern(float step, float size, boolean animated) {
+  noFill();
+  stroke(0);
+  for (float x = -size; x < size; x += step) {
+    for (float y = -size; y < size; y += step) {
+      float d = dist(x, y, 0, 0);
+      float osc = animated ? sin(d / 20.0 + frameCount * 0.05) : sin(d / 20.0);
+      float s = map(osc, -1, 1, 5, step);
+      ellipse(x, y, s, s);
+    }
+  }
+}
+
+// función que RETORNA un valor (ejemplo requerido)
+float randomGray() {
+  return random(50, 200);
+}
+
+// -----------------------------------------------------------------
+// INTERACTIVIDAD
+// -----------------------------------------------------------------
+
+void keyPressed() {
+  if (key == 'w' || key == 'W') {
+    spacing = max(5, spacing - 2); // acercar elementos
+  } else if (key == 's' || key == 'S') {
+    spacing += 2; // separar elementos
+  } else if (key == 'r' || key == 'R') {
+    // reiniciar variables a estado original
+    spacing = 20;
+    angle = 0;
+  }
+}
+
+void mouseMoved() {
+  // el ángulo del patrón depende de la posición horizontal del mouse
+  angle = map(mouseX, 0, width, 0, 360);
+}
+// https://youtu.be/hATJZF_I8nI
